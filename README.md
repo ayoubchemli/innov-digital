@@ -1,18 +1,8 @@
-# Welcome to your Lovable project
+# Security Vault: CodeVanguard team
 
-## Project info
+This is our solution of Innov-digit Hackathon 2k25 by CSE club. 
 
-**URL**: https://lovable.dev/projects/50befd75-a47c-4b7e-8a85-8f30ddb906ae
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/50befd75-a47c-4b7e-8a85-8f30ddb906ae) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
+## How to run it
 
 **Use your preferred IDE**
 
@@ -60,11 +50,6 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/50befd75-a47c-4b7e-8a85-8f30ddb906ae) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!
 
