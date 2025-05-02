@@ -1,0 +1,193 @@
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String           @id @default(uuid())
+  email             String           @unique
+  name              String
+  role              Role             @default(CLIENT)
+  password          String
+  organization      String
+  avatarUrl         String?
+  hasMfaEnabled     Boolean          @default(true)
+  biometricsEnabled Boolean          @default(false)
+  biometricsData    String?          // Stored securely as encrypted data
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  documents         Document[]       @relation("UserDocuments")
+  sharedDocuments   DocumentShare[]
+  activities        ActivityLog[]
+  forms             Form[]           @relation("FormCreator")
+  formResponses     FormResponse[]   @relation("FormResponder")
+  notifications     Notification[]
+  sessions          Session[]
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token        String   @unique
+  ipAddress    String?
+  userAgent    String?
+  lastActivity DateTime @default(now())
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+}
+
+model Document {
+  id            String          @id @default(uuid())
+  name          String
+  description   String?
+  fileType      String
+  fileSize      Int
+  filePath      String          // Path to Azure Blob storage
+  status        DocumentStatus  @default(ACTIVE)
+  sensitivity   SensitivityLevel @default(NORMAL)
+  userId        String
+  user          User            @relation("UserDocuments", fields: [userId], references: [id])
+  uploadDate    DateTime        @default(now())
+  lastModified  DateTime        @updatedAt
+  category      String?
+  tags          String[]
+  metadataJson  Json?
+  shares        DocumentShare[]
+  activities    ActivityLog[]
+  formResponses FormResponse[]  @relation("FormDocuments")
+}
+
+model DocumentShare {
+  id         String   @id @default(uuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission String   @default("view") // view, edit, sign
+  expiresAt  DateTime?
+  createdAt  DateTime @default(now())
+  viewed     Boolean  @default(false)
+  viewedAt   DateTime?
+
+  @@unique([documentId, userId])
+}
+
+model ActivityLog {
+  id          String       @id @default(uuid())
+  type        ActivityType
+  documentId  String?
+  document    Document?    @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  timestamp   DateTime     @default(now())
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?
+  formId      String?
+  form        Form?        @relation(fields: [formId], references: [id], onDelete: SetNull)
+}
+
+model Form {
+  id           String         @id @default(uuid())
+  title        String
+  description  String?
+  fields       Json           // Stores form schema
+  creatorId    String
+  creator      User           @relation("FormCreator", fields: [creatorId], references: [id])
+  createdAt    DateTime       @default(now())
+  expiresAt    DateTime?
+  status       FormStatus     @default(ACTIVE)
+  responses    FormResponse[]
+  activities   ActivityLog[]
+  securityLevel SensitivityLevel @default(NORMAL)
+  requiresIdVerification Boolean @default(false)
+}
+
+model FormResponse {
+  id          String   @id @default(uuid())
+  formId      String
+  form        Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  responderId String
+  responder   User     @relation("FormResponder", fields: [responderId], references: [id])
+  data        Json     // Stores form response data
+  submittedAt DateTime @default(now())
+  ipAddress   String?
+  documents   Document[] @relation("FormDocuments")
+  status      FormResponseStatus @default(SUBMITTED)
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  message     String
+  type        NotificationType
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  relatedId   String?          // ID of related entity (document, form, etc.)
+  relatedType String?          // Type of related entity
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum DocumentStatus {
+  ACTIVE
+  ARCHIVED
+  PENDING_SIGNATURE
+  SIGNED
+  DELETED
+}
+
+enum SensitivityLevel {
+  PUBLIC
+  NORMAL
+  CONFIDENTIAL
+  RESTRICTED
+}
+
+enum ActivityType {
+  VIEW
+  DOWNLOAD
+  UPLOAD
+  SHARE
+  SIGNATURE
+  LOGIN
+  LOGOUT
+  FORM_CREATE
+  FORM_SUBMIT
+  FORM_VIEW
+}
+
+enum FormStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+  ARCHIVED
+}
+
+enum FormResponseStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
