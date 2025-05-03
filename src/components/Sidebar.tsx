@@ -1,7 +1,6 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 import {
   Archive,
   FileText,
@@ -40,7 +39,7 @@ const NavItem = ({ to, icon: Icon, label, active }: NavItemProps) => (
 
 const Sidebar = () => {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user } = useAuthContext();
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -57,7 +56,7 @@ const Sidebar = () => {
             <Lock className="h-5 w-5 text-primary-foreground" />
           </div>
           <span className="font-semibold text-lg text-sidebar-foreground">
-            SecureVault
+            Confidex Exchange
           </span>
         </Link>
       </div>

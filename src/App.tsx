@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -27,6 +26,7 @@ import { DocumentProvider } from "./contexts/DocumentContext";
 // Layout components
 import MainLayout from "./layouts/MainLayout";
 import AuthLayout from "./layouts/AuthLayout";
+import Register from "./pages/Register";
 
 const queryClient = new QueryClient();
 
@@ -42,9 +42,10 @@ const App = () => (
               {/* Auth routes */}
               <Route element={<AuthLayout />}>
                 <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
               </Route>
-              
+
               {/* Protected routes */}
               <Route element={<MainLayout />}>
                 <Route path="/" element={<Dashboard />} />
@@ -60,7 +61,7 @@ const App = () => (
                 <Route path="/forms/:id/edit" element={<FormDesigner />} />
                 <Route path="/profile" element={<ClientProfile />} />
               </Route>
-              
+
               {/* Catch-all route */}
               <Route path="*" element={<NotFound />} />
             </Routes>

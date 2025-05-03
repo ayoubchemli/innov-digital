@@ -1,8 +1,11 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { useDocuments, DocumentCategory, DocumentSensitivity } from "@/contexts/DocumentContext";
+import { useAuthContext } from "@/contexts/AuthContext";
+import {
+  useDocuments,
+  DocumentCategory,
+  DocumentSensitivity,
+} from "@/contexts/DocumentContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,26 +18,38 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import SecurityBadge from "@/components/SecurityBadge";
 import { FileText, Lock, Upload as UploadIcon } from "lucide-react";
 
 const Upload = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const { addDocument, isLoading } = useDocuments();
-  
+
   const [fileName, setFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [category, setCategory] = useState<DocumentCategory>("other");
-  const [sensitivity, setSensitivity] = useState<DocumentSensitivity>("confidential");
+  const [sensitivity, setSensitivity] =
+    useState<DocumentSensitivity>("confidential");
   const [requireSignature, setRequireSignature] = useState(false);
-  const [metadata, setMetadata] = useState({ clientId: "", version: "", notes: "" });
+  const [metadata, setMetadata] = useState({
+    clientId: "",
+    version: "",
+    notes: "",
+  });
   const [isEncrypting, setIsEncrypting] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    
+
     if (files && files.length > 0) {
       const file = files[0];
       setSelectedFile(file);
@@ -44,22 +59,24 @@ const Upload = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedFile || !user) return;
-    
+
     setIsEncrypting(true);
-    
+
     // For demo, we're encoding the file to base64 to simulate encryption
     const reader = new FileReader();
-    
+
     reader.onload = () => {
       // Add the document with mock data
       const metadataObj = {
-        clientId: metadata.clientId || "AUTO-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
+        clientId:
+          metadata.clientId ||
+          "AUTO-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
         version: metadata.version || "1.0",
         notes: metadata.notes || "",
       };
-      
+
       addDocument({
         name: fileName,
         ownerId: user.id,
@@ -71,19 +88,19 @@ const Upload = () => {
         status: requireSignature ? "pending_signature" : "draft",
         sharedWith: [],
         isEncrypted: true,
-        fileType: selectedFile.name.split('.').pop() || "",
+        fileType: selectedFile.name.split(".").pop() || "",
         metadata: metadataObj,
         signatureRequired: requireSignature,
         content: reader.result as string,
       });
-      
+
       // Redirect to documents page after upload
       setTimeout(() => {
         setIsEncrypting(false);
         navigate("/documents");
       }, 2000);
     };
-    
+
     reader.readAsDataURL(selectedFile);
   };
 
@@ -134,14 +151,18 @@ const Upload = () => {
                     <div className="rounded-full bg-muted p-4">
                       <UploadIcon className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <p className="text-lg font-medium">Drag and drop your file here</p>
+                    <p className="text-lg font-medium">
+                      Drag and drop your file here
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       PDF, Word, Excel, and other document formats supported
                     </p>
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => document.getElementById("file-upload")?.click()}
+                      onClick={() =>
+                        document.getElementById("file-upload")?.click()
+                      }
                     >
                       Browse Files
                     </Button>
@@ -160,7 +181,7 @@ const Upload = () => {
             {/* Metadata Section */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Document Information</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="fileName">Document Name</Label>
@@ -171,10 +192,15 @@ const Upload = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
-                  <Select value={category} onValueChange={(value) => setCategory(value as DocumentCategory)}>
+                  <Select
+                    value={category}
+                    onValueChange={(value) =>
+                      setCategory(value as DocumentCategory)
+                    }
+                  >
                     <SelectTrigger id="category">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
@@ -187,10 +213,15 @@ const Upload = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="sensitivity">Sensitivity Level</Label>
-                  <Select value={sensitivity} onValueChange={(value) => setSensitivity(value as DocumentSensitivity)}>
+                  <Select
+                    value={sensitivity}
+                    onValueChange={(value) =>
+                      setSensitivity(value as DocumentSensitivity)
+                    }
+                  >
                     <SelectTrigger id="sensitivity">
                       <SelectValue placeholder="Select sensitivity" />
                     </SelectTrigger>
@@ -201,43 +232,51 @@ const Upload = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="clientId">Client ID (Optional)</Label>
                   <Input
                     id="clientId"
                     value={metadata.clientId}
-                    onChange={(e) => setMetadata({...metadata, clientId: e.target.value})}
+                    onChange={(e) =>
+                      setMetadata({ ...metadata, clientId: e.target.value })
+                    }
                     placeholder="Auto-generated if empty"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="version">Document Version (Optional)</Label>
                   <Input
                     id="version"
                     value={metadata.version}
-                    onChange={(e) => setMetadata({...metadata, version: e.target.value})}
+                    onChange={(e) =>
+                      setMetadata({ ...metadata, version: e.target.value })
+                    }
                     placeholder="1.0"
                   />
                 </div>
-                
+
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="notes">Additional Notes (Optional)</Label>
                   <Textarea
                     id="notes"
                     value={metadata.notes}
-                    onChange={(e) => setMetadata({...metadata, notes: e.target.value})}
+                    onChange={(e) =>
+                      setMetadata({ ...metadata, notes: e.target.value })
+                    }
                     placeholder="Add any additional notes or context for this document..."
                     className="resize-none"
                   />
                 </div>
-                
+
                 <div className="md:col-span-2 flex items-center space-x-2">
                   <Checkbox
                     id="requireSignature"
                     checked={requireSignature}
-                    onCheckedChange={(checked) => setRequireSignature(!!checked)}
+                    onCheckedChange={(checked) =>
+                      setRequireSignature(!!checked)
+                    }
                   />
                   <Label
                     htmlFor="requireSignature"
@@ -250,13 +289,13 @@ const Upload = () => {
             </div>
 
             <div className="flex items-center justify-center">
-              <SecurityBadge 
+              <SecurityBadge
                 status={isEncrypting ? "encrypting" : "secured"}
                 className="inline-flex"
               />
             </div>
           </CardContent>
-          
+
           <CardFooter className="flex justify-between">
             <Button
               type="button"
