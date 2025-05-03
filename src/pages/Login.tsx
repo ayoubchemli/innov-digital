@@ -1,257 +1,161 @@
-
-import { useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { Fingerprint, Lock, Mail, User, Shield } from "lucide-react";
+import React, { useState, useEffect } from "react"; // Import React and useEffect
+import { useNavigate, useLocation, Link, NavLink } from "react-router-dom";
+import { useAuthContext } from "@/contexts/AuthContext"; // Assuming AuthContext is updated
+import { Fingerprint, Lock, Mail, ShieldCheck, LogIn } from "lucide-react"; // Added LogIn, ShieldCheck
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import SecurityBadge from "@/components/SecurityBadge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner"; // Using sonner for toasts
+import { Authorizer } from "@authorizerdev/authorizer-react";
+
+// Placeholder for the new function needed in AuthContext
+// You'll need to add this function to your AuthContext implementation
+interface ExtendedAuthContextType extends ReturnType<typeof useAuthContext> {
+  loginWithBiometrics?: (email: string) => Promise<void>;
+}
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isLoading, hasMfaEnabled, hasBiometricsEnabled } = useAuth();
+  // Ensure useAuth returns the extended type with loginWithBiometrics
+  const {
+    login,
+    loginWithBiometrics, // *** Add this function to your AuthContext ***
+    isLoading,
+    isAuthenticated, // Check if already authenticated
+  } = useAuthContext() as ExtendedAuthContextType; // Cast for the new function
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mfaCode, setMfaCode] = useState("");
-  const [showMfa, setShowMfa] = useState(false);
   const [error, setError] = useState("");
-  const [authMethod, setAuthMethod] = useState<"password" | "biometrics">("password");
+  const [activeTab, setActiveTab] = useState<"password" | "biometrics">(
+    "password"
+  );
 
-  const from = location.state?.from?.pathname || "/";
+  const from = location.state?.from?.pathname || "/"; // Default to dashboard or appropriate route
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, from]);
+
+  const handlePasswordLogin = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     setError("");
 
-    if (authMethod === "password" && (!email || !password)) {
-      setError("Email and password are required");
+    if (!email || !password) {
+      setError("Email and password are required.");
       return;
     }
 
     try {
-      if (authMethod === "biometrics") {
-        await login(email, "", undefined, true);
-        navigate(from, { replace: true });
-        return;
-      }
-
-      await login(email, password, showMfa ? mfaCode : undefined);
-      // After successful login, explicitly navigate to the home route
-      console.log("Login successful, navigating to:", from);
+      // await login(email, password);
+      // Login function in context now handles potential 2nd factor (WebAuthn)
+      // If successful, navigation happens automatically or via useEffect
+      toast.success("Login Successful!");
       navigate(from, { replace: true });
     } catch (err: any) {
-      if (err.needsMfa) {
-        setShowMfa(true);
-      } else {
-        setError(err.message || "Login failed. Please check your credentials.");
-      }
+      console.error("Password login failed:", err);
+      setError(err.message || "Login failed. Please check your credentials.");
     }
   };
 
+  // const handleBiometricLogin = async (e?: React.FormEvent) => {
+  //   e?.preventDefault();
+  //   setError("");
+
+  //   if (!email) {
+  //     setError(
+  //       "Email is required to identify your account for biometric login."
+  //     );
+  //     return;
+  //   }
+
+  //   if (!loginWithBiometrics) {
+  //     setError("Biometric login function is not available in AuthContext.");
+  //     console.error("loginWithBiometrics function missing in AuthContext");
+  //     return;
+  //   }
+  //   if (!webAuthnSupported) {
+  //     setError(
+  //       "Your browser or device does not support biometric authentication."
+  //     );
+  //     return;
+  //   }
+
+  //   try {
+  //     toast.info(
+  //       "Please verify using your device biometric (Face ID, Touch ID, Windows Hello...)"
+  //     );
+  //     await loginWithBiometrics(email);
+  //     // If successful, context should set user and tokens
+  //     toast.success("Biometric Login Successful!");
+  //     navigate(from, { replace: true });
+  //   } catch (err: any) {
+  //     console.error("Biometric login failed:", err);
+  //     // Handle specific WebAuthn errors if possible
+  //     if (err.name === "NotAllowedError") {
+  //       setError("Biometric authentication was cancelled or not allowed.");
+  //     } else {
+  //       setError(
+  //         err.message ||
+  //           "Biometric login failed. Ensure biometrics are set up for this account."
+  //       );
+  //     }
+  //   }
+  // };
+
+  // const handleOAuth = async () => {
+  //   setError("");
+  //   try {
+  //     await initiateOAuthLogin();
+  //     // User will be redirected to OAuth provider
+  //   } catch (err: any) {
+  //     console.error("OAuth initiation failed:", err);
+  //     setError(err.message || "Could not start the OAuth login process.");
+  //   }
+  // };
+
   return (
-    <Card className="w-full max-w-md shadow-vault">
-      <CardHeader className="space-y-1">
-        <div className="flex justify-center mb-4">
-          <div className="rounded-full bg-primary/10 p-3">
-            <Lock className="h-8 w-8 text-primary" />
+    <Card className="w-full max-w-[50vw] shadow-xl border border-gray-200 rounded-lg overflow-hidden">
+      <CardHeader className="bg-gray-50 p-4 border-b border-gray-200 flex flex-row justify-between">
+        <div className="flex justify-center items-center">
+          <div className="rounded-full bg-primary/10 p-3 border border-primary/20 shadow-sm">
+            <ShieldCheck className="h-14 w-14 text-primary" />
           </div>
         </div>
-        <CardTitle className="text-2xl font-bold text-center">SecureVault</CardTitle>
-        <CardDescription className="text-center">
-          Secure Document Exchange Platform
-        </CardDescription>
+        <div className="flex flex-col items-center justify-center">
+          <CardTitle className="text-2xl font-bold text-center text-gray-800">
+            Confidex Exchange
+          </CardTitle>
+          <CardDescription className="text-center text-gray-500">
+            Secure Document Exchange Platform
+          </CardDescription>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {!showMfa && (
-          <Tabs defaultValue="password" className="w-full" onValueChange={(value) => setAuthMethod(value as "password" | "biometrics")}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="password">Password</TabsTrigger>
-              <TabsTrigger value="biometrics" disabled={!hasBiometricsEnabled}>Biometrics</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="password" className="mt-4">
-              <form onSubmit={handleLogin}>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="email"
-                        placeholder="you@example.com"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10"
-                        autoComplete="email"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="password">Password</Label>
-                      <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-                        Forgot password?
-                      </Link>
-                    </div>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10"
-                        autoComplete="current-password"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  {error && (
-                    <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                      {error}
-                    </div>
-                  )}
-                  
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-                        <span>Authenticating...</span>
-                      </div>
-                    ) : (
-                      "Sign In"
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="biometrics" className="mt-4">
-              <form onSubmit={handleLogin}>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="biometric-email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="biometric-email"
-                        placeholder="you@example.com"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10"
-                        autoComplete="email"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-center py-6">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="lg"
-                      className="h-24 w-24 rounded-full flex flex-col items-center justify-center gap-2"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleLogin(e);
-                      }}
-                      disabled={isLoading || !email}
-                    >
-                      <Fingerprint className="h-10 w-10" />
-                      <span className="text-xs">Verify</span>
-                    </Button>
-                  </div>
-                  
-                  {error && (
-                    <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                      {error}
-                    </div>
-                  )}
-                </div>
-              </form>
-              
-              <div className="mt-4 text-center text-xs text-muted-foreground">
-                <p>You can use biometric authentication if you have previously enabled it</p>
-              </div>
-            </TabsContent>
-          </Tabs>
-        )}
-
-        {showMfa && (
-          <form onSubmit={handleLogin}>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="mfaCode">Two-Factor Authentication Code</Label>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Enter the 6-digit code from your authenticator app
-                </p>
-                <div className="relative">
-                  <Shield className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="mfaCode"
-                    placeholder="123456"
-                    type="text"
-                    value={mfaCode}
-                    onChange={(e) => setMfaCode(e.target.value)}
-                    className="pl-10"
-                    autoComplete="one-time-code"
-                    required
-                    maxLength={6}
-                  />
-                </div>
-                <div className="mt-2 text-xs text-muted-foreground">
-                  <p>For demo purposes, use code: 123456</p>
-                </div>
-              </div>
-              
-              {error && (
-                <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                  {error}
-                </div>
-              )}
-              
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading || mfaCode.length !== 6}
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-                    <span>Verifying...</span>
-                  </div>
-                ) : (
-                  "Verify"
-                )}
-              </Button>
-            </div>
-          </form>
-        )}
-
-        {!showMfa && hasMfaEnabled && (
-          <div className="flex justify-center mt-2">
-            <SecurityBadge status="secured" />
-          </div>
-        )}
+      <CardContent className="p-6 space-y-4">
+        <Authorizer
+          onLogin={(data) => {
+            login(data);
+            navigate(from, { replace: true });
+          }}
+          onSignup={(data) => {
+            console.log("Signed up via Authorizer UI", data);
+            // navigate("/");
+          }}
+        />
       </CardContent>
-      <CardFooter className="flex flex-col">
-        <div className="text-center text-xs text-muted-foreground mt-2">
-          Protected by SecureVault E2EE Technology
-        </div>
-      </CardFooter>
     </Card>
   );
 };

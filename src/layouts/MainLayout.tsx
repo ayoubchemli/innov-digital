@@ -1,29 +1,32 @@
-
-import { Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useAuthContext } from "@/contexts/AuthContext";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 
 const MainLayout = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuthContext();
   const location = useLocation();
-  
+  const navigate = useNavigate();
+
   // Show loading state
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-          <p className="mt-4 text-muted-foreground">Loading secure environment...</p>
+          <p className="mt-4 text-muted-foreground">
+            Loading secure environment...
+          </p>
         </div>
       </div>
     );
   }
 
-  // Allow access to protected routes even when not authenticated
-  // This is not recommended for production use but allows direct access for testing
-  console.log("Authentication status:", isAuthenticated ? "Authenticated" : "Not authenticated");
-  console.log("Allowing access to protected routes without authentication");
+  // if (!isAuthenticated) {
+  //   console.log("User not authenticated, redirecting from MainLayout to /auth");
+  //   navigate("/auth", { state: { from: location }, replace: true });
+  //   return null;
+  // }
 
   return (
     <div className="flex h-screen w-full bg-background">

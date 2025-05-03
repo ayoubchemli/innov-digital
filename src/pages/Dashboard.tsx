@@ -1,12 +1,25 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { useDocuments } from "@/contexts/DocumentContext";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Lock, Upload, Signature, Eye, Download, User } from "lucide-react";
+import {
+  FileText,
+  Lock,
+  Upload,
+  Signature,
+  Eye,
+  Download,
+  User,
+} from "lucide-react";
 import SecurityBadge from "@/components/SecurityBadge";
 import ActivityLog from "@/components/ActivityLog";
 import DocumentCard from "@/components/DocumentCard";
@@ -21,7 +34,7 @@ const generateMockActivities = () => {
       documentName: "Client Agreement.pdf",
       userId: "1",
       userName: "John Admin",
-      timestamp: new Date(Date.now() - 1000 * 60 * 5) // 5 minutes ago
+      timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
     },
     {
       id: "act-2",
@@ -30,7 +43,7 @@ const generateMockActivities = () => {
       documentName: "KYC Documentation.docx",
       userId: "1",
       userName: "John Admin",
-      timestamp: new Date(Date.now() - 1000 * 60 * 30) // 30 minutes ago
+      timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
     },
     {
       id: "act-3",
@@ -39,7 +52,7 @@ const generateMockActivities = () => {
       documentName: "Client Agreement.pdf",
       userId: "2",
       userName: "Jane Client",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60) // 1 hour ago
+      timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
     },
     {
       id: "act-4",
@@ -49,64 +62,72 @@ const generateMockActivities = () => {
       userId: "1",
       userName: "John Admin",
       metadata: { recipient: "Jane Client" },
-      timestamp: new Date(Date.now() - 1000 * 60 * 120) // 2 hours ago
+      timestamp: new Date(Date.now() - 1000 * 60 * 120), // 2 hours ago
     },
     {
       id: "act-5",
       type: "login" as const,
       userId: "1",
       userName: "John Admin",
-      timestamp: new Date(Date.now() - 1000 * 60 * 180) // 3 hours ago
-    }
+      timestamp: new Date(Date.now() - 1000 * 60 * 180), // 3 hours ago
+    },
   ];
-  
+
   return activities;
 };
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const { documents } = useDocuments();
   const [activities, setActivities] = useState(generateMockActivities());
-  
+
   // Get pending documents that need signatures
-  const pendingDocuments = documents.filter(doc => doc.status === "pending_signature");
-  
+  const pendingDocuments = documents.filter(
+    (doc) => doc.status === "pending_signature"
+  );
+
   // Get recently uploaded documents
-  const recentDocuments = [...documents].sort((a, b) => {
-    return new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime();
-  }).slice(0, 3);
+  const recentDocuments = [...documents]
+    .sort((a, b) => {
+      return (
+        new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()
+      );
+    })
+    .slice(0, 3);
 
   const stats = [
     {
       title: "Documents",
       value: documents.length,
       icon: FileText,
-      color: "text-blue-500"
+      color: "text-blue-500",
     },
     {
       title: "Pending Signatures",
       value: pendingDocuments.length,
       icon: Signature,
-      color: "text-amber-500"
+      color: "text-amber-500",
     },
     {
       title: "Recent Views",
       value: 12, // Mock data
       icon: Eye,
-      color: "text-green-500"
+      color: "text-green-500",
     },
     {
       title: "Downloads",
       value: 5, // Mock data
       icon: Download,
-      color: "text-purple-500"
-    }
+      color: "text-purple-500",
+    },
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Welcome, {user?.name}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Welcome, {user?.name}
+        </h1>
         <p className="text-muted-foreground">
           Your secure document management dashboard
         </p>
@@ -150,11 +171,11 @@ const Dashboard = () => {
           <TabsTrigger value="activity">Activity Log</TabsTrigger>
           <TabsTrigger value="pending">Pending Approval</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="recent" className="space-y-4">
           {recentDocuments.length > 0 ? (
             <div className="grid gap-4">
-              {recentDocuments.map(document => (
+              {recentDocuments.map((document) => (
                 <DocumentCard key={document.id} document={document} />
               ))}
             </div>
@@ -169,7 +190,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           )}
-          
+
           {recentDocuments.length > 0 && (
             <div className="flex justify-end">
               <Button variant="outline" asChild>
@@ -178,7 +199,7 @@ const Dashboard = () => {
             </div>
           )}
         </TabsContent>
-        
+
         <TabsContent value="activity">
           <Card>
             <CardHeader>
@@ -192,7 +213,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="pending">
           <Card>
             <CardHeader>
@@ -204,7 +225,7 @@ const Dashboard = () => {
             <CardContent>
               {pendingDocuments.length > 0 ? (
                 <div className="grid gap-4">
-                  {pendingDocuments.map(document => (
+                  {pendingDocuments.map((document) => (
                     <DocumentCard key={document.id} document={document} />
                   ))}
                 </div>

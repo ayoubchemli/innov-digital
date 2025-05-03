@@ -1,9 +1,14 @@
-
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { FileText, Fingerprint, Lock, Mail, Phone, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -14,32 +19,33 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 
 const ClientProfile = () => {
-  const { user, updateUserProfile, beginBiometricRegistration } = useAuth();
+  const { user, updateUserProfile, beginBiometricRegistration } =
+    useAuthContext();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [personalInfo, setPersonalInfo] = useState({
     name: user?.name || "",
     email: user?.email || "",
     organization: user?.organization || "",
     phone: "+1 555-123-4567",
-    address: "123 Main Street, Suite 100\nNew York, NY 10001"
+    address: "123 Main Street, Suite 100\nNew York, NY 10001",
   });
-  
+
   const [security, setSecurity] = useState({
     mfaEnabled: true,
     biometricsEnabled: user?.biometricsEnabled || false,
     notificationsEnabled: true,
-    emailNotifications: true
+    emailNotifications: true,
   });
 
   const handlePersonalInfoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       await updateUserProfile({
         name: personalInfo.name,
-        organization: personalInfo.organization
+        organization: personalInfo.organization,
       });
       toast.success("Profile updated successfully");
     } catch (error) {
@@ -52,14 +58,14 @@ const ClientProfile = () => {
   const handleEnableBiometrics = async () => {
     const success = await beginBiometricRegistration();
     if (success) {
-      setSecurity(prev => ({ ...prev, biometricsEnabled: true }));
+      setSecurity((prev) => ({ ...prev, biometricsEnabled: true }));
     }
   };
 
   const getInitials = (name: string) => {
     return name
       .split(" ")
-      .map(part => part[0])
+      .map((part) => part[0])
       .join("")
       .toUpperCase();
   };
@@ -94,13 +100,13 @@ const ClientProfile = () => {
             <div className="mt-2 px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
               {user?.role === "admin" ? "Administrator" : "Client"}
             </div>
-            
+
             <Button variant="outline" className="mt-6 w-full">
               Change Profile Picture
             </Button>
-            
+
             <Separator className="my-6" />
-            
+
             <div className="w-full text-left">
               <h4 className="font-medium mb-4">Account Statistics</h4>
               <div className="space-y-4">
@@ -111,7 +117,7 @@ const ClientProfile = () => {
                   </div>
                   <span className="text-sm font-medium">12</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <svg
@@ -131,7 +137,7 @@ const ClientProfile = () => {
                   </div>
                   <span className="text-sm font-medium">3</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <svg
@@ -155,15 +161,17 @@ const ClientProfile = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <div className="md:w-2/3 space-y-6">
           <Tabs defaultValue="personal-info" className="space-y-4">
             <TabsList>
-              <TabsTrigger value="personal-info">Personal Information</TabsTrigger>
+              <TabsTrigger value="personal-info">
+                Personal Information
+              </TabsTrigger>
               <TabsTrigger value="security">Security</TabsTrigger>
               <TabsTrigger value="notifications">Notifications</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="personal-info">
               <Card>
                 <CardHeader>
@@ -173,7 +181,10 @@ const ClientProfile = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handlePersonalInfoSubmit} className="space-y-4">
+                  <form
+                    onSubmit={handlePersonalInfoSubmit}
+                    className="space-y-4"
+                  >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="name">Full Name</Label>
@@ -182,13 +193,18 @@ const ClientProfile = () => {
                           <Input
                             id="name"
                             value={personalInfo.name}
-                            onChange={(e) => setPersonalInfo(prev => ({ ...prev, name: e.target.value }))}
+                            onChange={(e) =>
+                              setPersonalInfo((prev) => ({
+                                ...prev,
+                                name: e.target.value,
+                              }))
+                            }
                             placeholder="Your full name"
                             className="pl-10"
                           />
                         </div>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="email">Email Address</Label>
                         <div className="relative">
@@ -200,20 +216,27 @@ const ClientProfile = () => {
                             disabled
                           />
                         </div>
-                        <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+                        <p className="text-xs text-muted-foreground">
+                          Email cannot be changed
+                        </p>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="organization">Organization</Label>
                       <Input
                         id="organization"
                         value={personalInfo.organization}
-                        onChange={(e) => setPersonalInfo(prev => ({ ...prev, organization: e.target.value }))}
+                        onChange={(e) =>
+                          setPersonalInfo((prev) => ({
+                            ...prev,
+                            organization: e.target.value,
+                          }))
+                        }
                         placeholder="Company or organization name"
                       />
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="phone">Phone Number</Label>
@@ -222,24 +245,34 @@ const ClientProfile = () => {
                           <Input
                             id="phone"
                             value={personalInfo.phone}
-                            onChange={(e) => setPersonalInfo(prev => ({ ...prev, phone: e.target.value }))}
+                            onChange={(e) =>
+                              setPersonalInfo((prev) => ({
+                                ...prev,
+                                phone: e.target.value,
+                              }))
+                            }
                             placeholder="Your phone number"
                             className="pl-10"
                           />
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="address">Address</Label>
                       <Textarea
                         id="address"
                         value={personalInfo.address}
-                        onChange={(e) => setPersonalInfo(prev => ({ ...prev, address: e.target.value }))}
+                        onChange={(e) =>
+                          setPersonalInfo((prev) => ({
+                            ...prev,
+                            address: e.target.value,
+                          }))
+                        }
                         placeholder="Your address"
                       />
                     </div>
-                    
+
                     <Button type="submit" disabled={isLoading}>
                       {isLoading ? (
                         <div className="flex items-center justify-center gap-2">
@@ -254,7 +287,7 @@ const ClientProfile = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             <TabsContent value="security">
               <Card>
                 <CardHeader>
@@ -277,9 +310,9 @@ const ClientProfile = () => {
                       </div>
                       <Button variant="outline">Change Password</Button>
                     </div>
-                    
+
                     <Separator />
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
@@ -295,7 +328,9 @@ const ClientProfile = () => {
                           >
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
                           </svg>
-                          <Label htmlFor="mfa">Two-Factor Authentication (2FA)</Label>
+                          <Label htmlFor="mfa">
+                            Two-Factor Authentication (2FA)
+                          </Label>
                         </div>
                         <p className="text-sm text-muted-foreground">
                           Require a verification code when logging in
@@ -304,17 +339,24 @@ const ClientProfile = () => {
                       <Switch
                         id="mfa"
                         checked={security.mfaEnabled}
-                        onCheckedChange={(checked) => setSecurity(prev => ({ ...prev, mfaEnabled: checked }))}
+                        onCheckedChange={(checked) =>
+                          setSecurity((prev) => ({
+                            ...prev,
+                            mfaEnabled: checked,
+                          }))
+                        }
                       />
                     </div>
-                    
+
                     <Separator />
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
                           <Fingerprint className="h-4 w-4 text-muted-foreground" />
-                          <Label htmlFor="biometrics">Biometric Authentication</Label>
+                          <Label htmlFor="biometrics">
+                            Biometric Authentication
+                          </Label>
                         </div>
                         <p className="text-sm text-muted-foreground">
                           Use fingerprint or face recognition to login
@@ -322,20 +364,32 @@ const ClientProfile = () => {
                       </div>
                       {security.biometricsEnabled ? (
                         <div className="flex items-center gap-2">
-                          <div className="text-xs font-medium text-green-600 dark:text-green-400">Enabled</div>
+                          <div className="text-xs font-medium text-green-600 dark:text-green-400">
+                            Enabled
+                          </div>
                           <Switch
                             id="biometrics"
                             checked={security.biometricsEnabled}
-                            onCheckedChange={(checked) => setSecurity(prev => ({ ...prev, biometricsEnabled: checked }))}
+                            onCheckedChange={(checked) =>
+                              setSecurity((prev) => ({
+                                ...prev,
+                                biometricsEnabled: checked,
+                              }))
+                            }
                           />
                         </div>
                       ) : (
-                        <Button variant="outline" onClick={handleEnableBiometrics}>Enable</Button>
+                        <Button
+                          variant="outline"
+                          onClick={handleEnableBiometrics}
+                        >
+                          Enable
+                        </Button>
                       )}
                     </div>
-                    
+
                     <Separator />
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label>Device Management</Label>
@@ -345,9 +399,9 @@ const ClientProfile = () => {
                       </div>
                       <Button variant="outline">Manage Devices</Button>
                     </div>
-                    
+
                     <Separator />
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label>Account Activity</Label>
@@ -361,7 +415,7 @@ const ClientProfile = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             <TabsContent value="notifications">
               <Card>
                 <CardHeader>
@@ -375,7 +429,10 @@ const ClientProfile = () => {
                     <h4 className="text-sm font-medium">Email Notifications</h4>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="email-security" className="flex flex-col space-y-1">
+                        <Label
+                          htmlFor="email-security"
+                          className="flex flex-col space-y-1"
+                        >
                           <span>Security Alerts</span>
                           <span className="font-normal text-xs text-muted-foreground">
                             Receive emails about security events
@@ -384,12 +441,20 @@ const ClientProfile = () => {
                         <Switch
                           id="email-security"
                           checked={security.emailNotifications}
-                          onCheckedChange={(checked) => setSecurity(prev => ({ ...prev, emailNotifications: checked }))}
+                          onCheckedChange={(checked) =>
+                            setSecurity((prev) => ({
+                              ...prev,
+                              emailNotifications: checked,
+                            }))
+                          }
                         />
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="email-documents" className="flex flex-col space-y-1">
+                        <Label
+                          htmlFor="email-documents"
+                          className="flex flex-col space-y-1"
+                        >
                           <span>Document Sharing</span>
                           <span className="font-normal text-xs text-muted-foreground">
                             Get notified when someone shares a document with you
@@ -397,9 +462,12 @@ const ClientProfile = () => {
                         </Label>
                         <Switch id="email-documents" defaultChecked />
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="email-signatures" className="flex flex-col space-y-1">
+                        <Label
+                          htmlFor="email-signatures"
+                          className="flex flex-col space-y-1"
+                        >
                           <span>Signature Requests</span>
                           <span className="font-normal text-xs text-muted-foreground">
                             Get notified about signature requests
@@ -408,13 +476,18 @@ const ClientProfile = () => {
                         <Switch id="email-signatures" defaultChecked />
                       </div>
                     </div>
-                    
+
                     <Separator />
-                    
-                    <h4 className="text-sm font-medium">In-App Notifications</h4>
+
+                    <h4 className="text-sm font-medium">
+                      In-App Notifications
+                    </h4>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="app-security" className="flex flex-col space-y-1">
+                        <Label
+                          htmlFor="app-security"
+                          className="flex flex-col space-y-1"
+                        >
                           <span>Security Alerts</span>
                           <span className="font-normal text-xs text-muted-foreground">
                             Show security notifications in-app
@@ -422,9 +495,12 @@ const ClientProfile = () => {
                         </Label>
                         <Switch id="app-security" defaultChecked />
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="app-documents" className="flex flex-col space-y-1">
+                        <Label
+                          htmlFor="app-documents"
+                          className="flex flex-col space-y-1"
+                        >
                           <span>Document Updates</span>
                           <span className="font-normal text-xs text-muted-foreground">
                             Show notifications for document changes
@@ -433,7 +509,7 @@ const ClientProfile = () => {
                         <Switch id="app-documents" defaultChecked />
                       </div>
                     </div>
-                    
+
                     <Button>Save Notification Settings</Button>
                   </div>
                 </CardContent>

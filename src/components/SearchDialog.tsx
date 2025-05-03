@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -35,23 +34,50 @@ const SearchDialog = () => {
 
   // Mock users for search
   const mockUsers = [
-    { id: "u1", name: "John Admin", email: "admin@securevault.com", role: "admin" },
-    { id: "u2", name: "Jane Client", email: "client@example.com", role: "client" },
-    { id: "u3", name: "Alice Manager", email: "alice@example.com", role: "admin" },
+    {
+      id: "u1",
+      name: "John Admin",
+      email: "admin@confidexexchange.com",
+      role: "admin",
+    },
+    {
+      id: "u2",
+      name: "Jane Client",
+      email: "client@example.com",
+      role: "client",
+    },
+    {
+      id: "u3",
+      name: "Alice Manager",
+      email: "alice@example.com",
+      role: "admin",
+    },
     { id: "u4", name: "Bob Analyst", email: "bob@company.net", role: "client" },
   ];
 
   // Mock forms for search
   const mockForms = [
-    { id: "f1", title: "KYC Documentation", description: "Know Your Customer form" },
-    { id: "f2", title: "Account Opening", description: "New account application" },
-    { id: "f3", title: "Loan Application", description: "Personal loan request form" },
+    {
+      id: "f1",
+      title: "KYC Documentation",
+      description: "Know Your Customer form",
+    },
+    {
+      id: "f2",
+      title: "Account Opening",
+      description: "New account application",
+    },
+    {
+      id: "f3",
+      title: "Loan Application",
+      description: "Personal loan request form",
+    },
   ];
 
   // Search function
   const performSearch = (searchQuery: string) => {
     setLoading(true);
-    
+
     // Simulate API delay
     setTimeout(() => {
       if (!searchQuery.trim()) {
@@ -59,48 +85,52 @@ const SearchDialog = () => {
         setLoading(false);
         return;
       }
-      
+
       const query = searchQuery.toLowerCase();
-      
+
       // Search documents
       const docResults: SearchResult[] = documents
-        .filter(doc => doc.name.toLowerCase().includes(query))
-        .map(doc => ({
+        .filter((doc) => doc.name.toLowerCase().includes(query))
+        .map((doc) => ({
           id: doc.id,
           type: "document",
           title: doc.name,
-          subtitle: `${doc.fileType} • ${new Date(doc.uploadDate).toLocaleDateString()}`,
-          url: `/documents/${doc.id}`
+          subtitle: `${doc.fileType} • ${new Date(
+            doc.uploadDate
+          ).toLocaleDateString()}`,
+          url: `/documents/${doc.id}`,
         }));
-      
+
       // Search users
       const userResults: SearchResult[] = mockUsers
-        .filter(user => 
-          user.name.toLowerCase().includes(query) || 
-          user.email.toLowerCase().includes(query)
+        .filter(
+          (user) =>
+            user.name.toLowerCase().includes(query) ||
+            user.email.toLowerCase().includes(query)
         )
-        .map(user => ({
+        .map((user) => ({
           id: user.id,
           type: "user",
           title: user.name,
           subtitle: `${user.email} • ${user.role}`,
-          url: `/users/${user.id}`
+          url: `/users/${user.id}`,
         }));
-      
+
       // Search forms
       const formResults: SearchResult[] = mockForms
-        .filter(form => 
-          form.title.toLowerCase().includes(query) || 
-          form.description.toLowerCase().includes(query)
+        .filter(
+          (form) =>
+            form.title.toLowerCase().includes(query) ||
+            form.description.toLowerCase().includes(query)
         )
-        .map(form => ({
+        .map((form) => ({
           id: form.id,
           type: "form",
           title: form.title,
           subtitle: form.description,
-          url: `/forms/${form.id}`
+          url: `/forms/${form.id}`,
         }));
-      
+
       // Combine and limit results
       setResults([...docResults, ...userResults, ...formResults].slice(0, 10));
       setLoading(false);
@@ -121,16 +151,22 @@ const SearchDialog = () => {
   // Get icon for result type
   const getResultIcon = (type: SearchResultType) => {
     switch (type) {
-      case "document": return <FileText className="h-4 w-4" />;
-      case "user": return <User className="h-4 w-4" />;
-      case "form": return <File className="h-4 w-4" />;
+      case "document":
+        return <FileText className="h-4 w-4" />;
+      case "user":
+        return <User className="h-4 w-4" />;
+      case "form":
+        return <File className="h-4 w-4" />;
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <div className="relative max-w-md cursor-pointer" onClick={() => setOpen(true)}>
+        <div
+          className="relative max-w-md cursor-pointer"
+          onClick={() => setOpen(true)}
+        >
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
