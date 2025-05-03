@@ -23,10 +23,8 @@ const MainLayout = () => {
   }
 
   // if (!isAuthenticated) {
-  //   console.log(
-  //     "User not authenticated, redirecting from MainLayout to /login"
-  //   );
-  //   navigate("/login", { state: { from: location }, replace: true });
+  //   console.log("User not authenticated, redirecting from MainLayout to /auth");
+  //   navigate("/auth", { state: { from: location }, replace: true });
   //   return null;
   // }
 

@@ -270,7 +270,7 @@ const Register = () => {
         <div className="text-center text-xs text-gray-500 w-full">
           Already have an account?{" "}
           <NavLink
-            to="/login"
+            to="/auth"
             className="font-medium text-blue-600 hover:text-blue-500"
           >
             Sign in

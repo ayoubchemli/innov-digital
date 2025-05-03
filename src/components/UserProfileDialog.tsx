@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, User } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useNavigate } from "react-router-dom";
 
 const UserProfileDialog = () => {
   const { user, updateUserProfile, isLoading, logout } = useAuthContext();
@@ -23,6 +24,7 @@ const UserProfileDialog = () => {
     organization: user?.organization || "",
     avatarUrl: user?.avatarUrl || "",
   });
+  const navigate = useNavigate();
 
   const getInitials = (name: string) => {
     return name
@@ -45,7 +47,11 @@ const UserProfileDialog = () => {
       console.error("Failed to update profile:", error);
     }
   };
-
+  function handleLogOut() {
+    logout();
+    navigate("/auth");
+    setOpen(false);
+  }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -126,7 +132,7 @@ const UserProfileDialog = () => {
                 variant="destructive"
                 type="button"
                 className="w-full"
-                onClick={logout}
+                onClick={handleLogOut}
               >
                 Logout
               </Button>

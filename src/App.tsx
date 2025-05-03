@@ -29,6 +29,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import Register from "./pages/Register";
 
 const queryClient = new QueryClient();
+const AUTHORIZER_URL = import.meta.env.VITE_AUTHORIZER_URL;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -41,8 +42,7 @@ const App = () => (
             <Routes>
               {/* Auth routes */}
               <Route element={<AuthLayout />}>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+                <Route path="/auth" element={<Login />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
               </Route>
 

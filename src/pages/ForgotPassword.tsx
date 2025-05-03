@@ -32,6 +32,7 @@ const ForgotPassword = () => {
     try {
       await requestPasswordReset(email);
       setSubmitted(true);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Failed to request password reset");
     }
@@ -42,7 +43,7 @@ const ForgotPassword = () => {
       <CardHeader className="space-y-1">
         <div className="flex items-center">
           <Button variant="ghost" size="icon" asChild>
-            <Link to="/login">
+            <Link to="/auth">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -96,7 +97,7 @@ const ForgotPassword = () => {
 
               <div className="text-center">
                 <Link
-                  to="/login"
+                  to="/auth"
                   className="text-sm text-primary hover:underline"
                 >
                   Back to login
@@ -115,7 +116,7 @@ const ForgotPassword = () => {
               inbox and follow the instructions.
             </p>
             <Button variant="outline" asChild>
-              <Link to="/login">Return to Login</Link>
+              <Link to="/auth">Return to Login</Link>
             </Button>
           </div>
         )}
